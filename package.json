@@ -1,6 +1,6 @@
 {
-  "name": "cordova-plugin-file",
-  "version": "8.0.1-dev",
+  "name": "@ns0m/cordova-plugin-file",
+  "version": "8.0.1-3",
   "description": "Cordova File Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
@@ -13,8 +13,8 @@
       "windows"
     ]
   },
-  "repository": "github:apache/cordova-plugin-file",
-  "bugs": "https://github.com/apache/cordova-plugin-file/issues",
+  "repository": "github:ns0m/cordova-plugin-file",
+  "bugs": "https://github.com/ns0m/cordova-plugin-file/issues",
   "keywords": [
     "cordova",
     "file",
