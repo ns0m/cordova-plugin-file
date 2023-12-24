@@ -1018,7 +1018,7 @@ public class FileUtils extends CordovaPlugin {
                 ret.put("externalRootDirectory", toDirUrl(Environment.getExternalStorageDirectory()));
             } catch (NullPointerException e) {
                 /* If external storage is unavailable, context.getExternal* returns null */
-                LOG.d(LOG_TAG, "Unable to access these paths, most likely due to USB storage");
+                LOG.d(LOG_TAG, "Unable to access these paths, most liklely due to USB storage");
             }
         }
         return ret;
