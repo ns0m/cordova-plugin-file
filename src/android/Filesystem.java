@@ -106,7 +106,7 @@ public abstract class Filesystem {
     }
 
     abstract JSONObject getFileForLocalURL(LocalFilesystemURL inputURL, String path,
-                                           JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException;
+            JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException;
 
     abstract boolean removeFileAtLocalURL(LocalFilesystemURL inputURL) throws InvalidModificationException, NoModificationAllowedException;
 
@@ -295,7 +295,7 @@ public abstract class Filesystem {
     }
 
     abstract long writeToFileAtURL(LocalFilesystemURL inputURL, String data, int offset,
-                                   boolean isBinary) throws NoModificationAllowedException, IOException;
+            boolean isBinary) throws NoModificationAllowedException, IOException;
 
     abstract long truncateFileAtURL(LocalFilesystemURL inputURL, long size)
             throws IOException, NoModificationAllowedException;

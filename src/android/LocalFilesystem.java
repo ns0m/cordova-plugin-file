@@ -18,29 +18,25 @@
  */
 package org.apache.cordova.file;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.util.Base64;
 
 import org.apache.cordova.CordovaPreferences;
 import org.apache.cordova.CordovaResourceApi;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Build;
-import android.os.Environment;
-import android.util.Base64;
-import android.net.Uri;
-import android.content.Context;
-import android.content.Intent;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 public class LocalFilesystem extends Filesystem {
@@ -110,7 +106,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject getFileForLocalURL(LocalFilesystemURL inputURL,
-                                         String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
+            String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
         boolean create = false;
         boolean exclusive = false;
 
@@ -327,7 +323,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject copyFileToURL(LocalFilesystemURL destURL, String newName,
-                                    Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, JSONException, NoModificationAllowedException, FileExistsException {
+            Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, JSONException, NoModificationAllowedException, FileExistsException {
 
         // Check to see if the destination directory exists
         String newParent = this.filesystemPathForURL(destURL);
@@ -374,7 +370,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public long writeToFileAtURL(LocalFilesystemURL inputURL, String data,
-                                 int offset, boolean isBinary) throws IOException, NoModificationAllowedException {
+            int offset, boolean isBinary) throws IOException, NoModificationAllowedException {
 
         boolean append = false;
         if (offset > 0) {
@@ -389,7 +385,8 @@ public class LocalFilesystem extends Filesystem {
             rawData = data.getBytes(Charset.defaultCharset());
         }
         ByteArrayInputStream in = new ByteArrayInputStream(rawData);
-        try {
+        try
+        {
             byte buff[] = new byte[rawData.length];
             String absolutePath = filesystemPathForURL(inputURL);
             FileOutputStream out = new FileOutputStream(absolutePath, append);

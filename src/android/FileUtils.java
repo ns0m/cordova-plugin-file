@@ -39,7 +39,6 @@ import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.LOG;
 import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -543,10 +542,21 @@ public class FileUtils extends CordovaPlugin {
     }
 
     private void getWritePermission(String rawArgs, int action, CallbackContext callbackContext) {
-        int requestCode = pendingRequests.createRequest(rawArgs, action, callbackContext);
-        PermissionHelper.requestPermission(this, requestCode, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            int requestCode = pendingRequests.createRequest(rawArgs, action, callbackContext);
+            PermissionHelper.requestPermission(this, requestCode, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
     }
 
+    /**
+     * If your app targets Android 13 (SDK 33) or higher and needs to access media files that other apps have created,
+     * you must request one or more of the following granular media permissions READ_MEDIA_*
+     * instead of the READ_EXTERNAL_STORAGE permission:
+     *
+     * Refer to: https://developer.android.com/about/versions/13/behavior-changes-13
+     *
+     * @return
+     */
     private boolean hasReadPermission() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return PermissionHelper.hasPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
@@ -558,7 +568,10 @@ public class FileUtils extends CordovaPlugin {
     }
 
     private boolean hasWritePermission() {
-        return PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        // Starting with API 33, requesting WRITE_EXTERNAL_STORAGE is an auto permission rejection
+        return android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ? true
+                : PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     private boolean needPermission(String nativeURL, int permissionType) throws JSONException {
@@ -685,8 +698,6 @@ public class FileUtils extends CordovaPlugin {
                         callbackContext.error(FileUtils.ENCODING_ERR);
                     } else if (e instanceof IOException) {
                         callbackContext.error(FileUtils.INVALID_MODIFICATION_ERR);
-                    } else if (e instanceof EncodingException) {
-                        callbackContext.error(FileUtils.ENCODING_ERR);
                     } else if (e instanceof TypeMismatchException) {
                         callbackContext.error(FileUtils.TYPE_MISMATCH_ERR);
                     } else if (e instanceof JSONException) {
@@ -1001,56 +1012,16 @@ public class FileUtils extends CordovaPlugin {
         ret.put("applicationStorageDirectory", toDirUrl(context.getFilesDir().getParentFile()));
         ret.put("dataDirectory", toDirUrl(context.getFilesDir()));
         ret.put("cacheDirectory", toDirUrl(context.getCacheDir()));
-        try {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            try {
                 ret.put("externalApplicationStorageDirectory", toDirUrl(context.getExternalFilesDir(null).getParentFile()));
                 ret.put("externalDataDirectory", toDirUrl(context.getExternalFilesDir(null)));
                 ret.put("externalCacheDirectory", toDirUrl(context.getExternalCacheDir()));
                 ret.put("externalRootDirectory", toDirUrl(Environment.getExternalStorageDirectory()));
+            } catch (NullPointerException e) {
+                /* If external storage is unavailable, context.getExternal* returns null */
+                LOG.d(LOG_TAG, "Unable to access these paths, most liklely due to USB storage");
             }
-
-            JSONArray removableExternalApplicationStorageDirs = new JSONArray();
-            JSONArray removableExternalDataDirs = new JSONArray();
-            JSONArray removableExternalCacheDirs = new JSONArray();
-            JSONArray removableExternalMediaDirs = new JSONArray();
-            String externalMediaDir = null;
-            for (File filesDir : context.getExternalFilesDirs(null)) {
-                if (filesDir != null) {
-                    if (Environment.isExternalStorageRemovable(filesDir)) {
-                        removableExternalApplicationStorageDirs.put(toDirUrl(filesDir.getParentFile()));
-                        removableExternalDataDirs.put(toDirUrl(filesDir));
-                    }
-                }
-            }
-            for (File cacheDir : context.getExternalCacheDirs()) {
-                if (cacheDir != null) {
-                    if (Environment.isExternalStorageRemovable(cacheDir)) {
-                        removableExternalCacheDirs.put(toDirUrl(cacheDir));
-                    }
-                }
-            }
-            for (File mediaDir : context.getExternalMediaDirs()) {
-                if (mediaDir != null) {
-                    String dirUrl = toDirUrl(mediaDir);
-                    if (Environment.isExternalStorageRemovable(mediaDir)) {
-                        removableExternalMediaDirs.put(dirUrl);
-                    } else {
-                        if (externalMediaDir != null) {
-                            LOG.w(LOG_TAG, "External media directory already found ; skip other value " + dirUrl);
-                            continue;
-                        }
-                        externalMediaDir = dirUrl;
-                    }
-                }
-            }
-            ret.put("removableExternalApplicationStorageDirectories", removableExternalApplicationStorageDirs);
-            ret.put("removableExternalDataDirectories", removableExternalDataDirs);
-            ret.put("removableExternalCacheDirectories", removableExternalCacheDirs);
-            ret.put("removableExternalMediaDirectories", removableExternalMediaDirs);
-            ret.put("externalMediaDirectory", externalMediaDir);
-        } catch (NullPointerException e) {
-            /* If external storage is unavailable, context.getExternal* returns null */
-            LOG.d(LOG_TAG, "Unable to access these paths, most likely due to USB storage");
         }
         return ret;
     }
