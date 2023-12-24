@@ -106,7 +106,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject getFileForLocalURL(LocalFilesystemURL inputURL,
-            String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
+                                         String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
         boolean create = false;
         boolean exclusive = false;
 
@@ -323,7 +323,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject copyFileToURL(LocalFilesystemURL destURL, String newName,
-            Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, JSONException, NoModificationAllowedException, FileExistsException {
+                                    Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, JSONException, NoModificationAllowedException, FileExistsException {
 
         // Check to see if the destination directory exists
         String newParent = this.filesystemPathForURL(destURL);
@@ -370,7 +370,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public long writeToFileAtURL(LocalFilesystemURL inputURL, String data,
-            int offset, boolean isBinary) throws IOException, NoModificationAllowedException {
+                                 int offset, boolean isBinary) throws IOException, NoModificationAllowedException {
 
         boolean append = false;
         if (offset > 0) {
@@ -385,8 +385,7 @@ public class LocalFilesystem extends Filesystem {
             rawData = data.getBytes(Charset.defaultCharset());
         }
         ByteArrayInputStream in = new ByteArrayInputStream(rawData);
-        try
-        {
+        try {
             byte buff[] = new byte[rawData.length];
             String absolutePath = filesystemPathForURL(inputURL);
             FileOutputStream out = new FileOutputStream(absolutePath, append);
